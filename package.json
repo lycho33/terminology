@@ -4,10 +4,29 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "kysely:types": "prisma generate",
+    "db:update": "prisma db pull",
+    "db:restart": "ts-node src/seed.ts",
+    "og:start": "tsx src/index.ts",
+    "start": "node src/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.9.0"
+  "packageManager": "pnpm@10.9.0",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "kysely": "0.28.2",
+    "pg": "^8.15.6",
+    "prisma-kysely": "1.8.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.14",
+    "prisma": "6.6.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  }
 }

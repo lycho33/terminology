@@ -1,0 +1,25 @@
+generator kysely {
+    provider = "prisma-kysely"
+    output   = "./src/types"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Topic {
+    id   Int    @id @default(autoincrement())
+    name String
+    Term Term[]
+}
+
+model Term {
+    id         Int     @id @default(autoincrement())
+    name       String
+    definition String
+    usage      String?
+    example    Json?
+    topicId    Int
+    topic      Topic   @relation(fields: [topicId], references: [id])
+}

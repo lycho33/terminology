@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Term" ALTER COLUMN "example" DROP NOT NULL,
+ALTER COLUMN "usage" DROP NOT NULL;
