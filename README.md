@@ -32,7 +32,16 @@ Currently there are 2 ways to run the application.
 ### Docker
 
 ```
-docker compose up --build
+docker compose up
+cd ./src/graphdb
+python3 main.py
+```
+
+To Enter and exit venv
+
+```
+source venv/bin/activate
+deactivate -- EXIT
 ```
 
 ### Kubernetes
