@@ -10,7 +10,8 @@
     "db:update": "prisma db pull",
     "db:restart": "ts-node src/seed.ts",
     "og:start": "tsx src/index.ts",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "start:api": "node src/api/index.js"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +19,7 @@
   "packageManager": "pnpm@10.9.0",
   "dependencies": {
     "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "kysely": "0.28.2",
     "pg": "^8.15.6",
     "prisma-kysely": "1.8.0"
