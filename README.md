@@ -4,7 +4,7 @@ Build a personal knowledge graph with AI generated diagrams that help you visual
 
 ### Demo So Far
 
-[Watch the demo video](https://github.com/lycho33/Terminology/raw/main/assets/terminology-demo.mp4)
+- [Watch the demo video](https://github.com/lycho33/Terminology/raw/main/assets/terminology-demo.mp4)
 
 ### Tech Stack
 
@@ -12,6 +12,8 @@ Build a personal knowledge graph with AI generated diagrams that help you visual
 - FastApi
 - Neontology
 - Vite / React
+
+[Architecture Diagram](ARCHITECTURE.md)
 
 ### Access DB
 
