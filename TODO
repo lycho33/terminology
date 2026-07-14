@@ -1,0 +1,7 @@
+# Model Exploration
+
+1. Run a local model via [llama.ccp](https://github.com/ggml-org/llama.cpp#text-only)
+
+# Full-Stack App Enhancement
+
+1. Add error handling for each endpoint and have that correctly displayed on the frontend
