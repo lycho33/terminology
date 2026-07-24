@@ -49,3 +49,19 @@ services:
       - /app/node_modules # Keeps node_modules inside Docker instead of replacing it with /frontend/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
+  llama:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    container_name: llama-cpp
+    ports:
+      - "9000:9000"
+    volumes:
+      # Keeps the downloaded model after the container stops.
+      - ./hf-cache:/root/.cache/huggingface
+    environment:
+      LLAMA_ARG_HF_REPO: "ggml-org/gpt-oss-20b-GGUF"
+      LLAMA_ARG_HF_FILE: "gpt-oss-20b-mxfp4.gguf" # GGUF File
+      LLAMA_ARG_CTX_SIZE: "32768" # Max Context window
+      LLAMA_ARG_JINJA: "true" # changes api payload to model-readaable format
+      LLAMA_ARG_HOST: "0.0.0.0"
+      LLAMA_ARG_PORT: "9000"
+    restart: unless-stopped
