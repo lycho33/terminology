@@ -6,6 +6,8 @@ from .nodes import TermNode
 from .models import Term, UpdateTermRequest
 from fastapi.middleware.cors import CORSMiddleware
 
+import httpx
+
 app = FastAPI()
 
 # Allow [CORS](https://fastapi.tiangolo.com/tutorial/cors/#use-corsmiddleware)
@@ -124,3 +126,27 @@ def delete_term(term_name: str):
     """
     res = gc.evaluate_query(delete_query, {"term_name": term_name})
     return {"name": term_name, "result": res}
+
+
+@app.get("/model/health", status_code=status.HTTP_200_OK)
+async def model_health():
+	model_url = "http://llama-cpp:9000/health"
+	async with httpx.AsyncClient() as client:
+			try:
+				response = await client.get(model_url)
+				
+				# Raise an exception for 4xx or 5xx status codes
+				response.raise_for_status() 
+				
+				return response.json()
+				
+			except httpx.HTTPStatusError as exc:
+				raise HTTPException(
+					status_code=exc.response.status_code, 
+					detail=f"Model API error: {exc.response.text}"
+				)
+			except httpx.RequestError:
+				raise HTTPException(
+					status_code=503, 
+					detail="Model API is unavailable"
+				)
