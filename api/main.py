@@ -7,6 +7,7 @@ from .models import Term, UpdateTermRequest
 from fastapi.middleware.cors import CORSMiddleware
 
 import httpx
+from neo4j.exceptions import DriverError, Neo4jError
 
 app = FastAPI()
 
@@ -124,9 +125,21 @@ def delete_term(term_name: str):
     DETACH DELETE t
     RETURN count(t) as deleted_count
     """
-    res = gc.evaluate_query(delete_query, {"term_name": term_name})
-    return {"name": term_name, "result": res}
+    try:
+        res = gc.evaluate_query(delete_query, {"term_name": term_name})
+    except (DriverError, Neo4jError) as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database failed to delete term {term_name.capitalize()}",
+        ) from exc
 
+    if res.records_raw[0]["deleted_count"] == 0:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Term {term_name.capitalize()} not found. Cannot delete",
+        )
+
+    return {"name": term_name, "result": res}
 
 @app.get("/model/health", status_code=status.HTTP_200_OK)
 async def model_health():

@@ -17,8 +17,9 @@ export const TermProvider = ({ children }: { children: ReactNode }) => {
   const { mutate: updateTerm, isSuccess: isUpdateSuccess } = useUpdateTerm();
   const {
     mutate: deleteTerm,
-    isError: isDeleteError,
+    error: deleteError,
     isPending: isDeletePending,
+    reset: resetDeleteError,
   } = useDeleteTerm();
 
   return (
@@ -44,8 +45,9 @@ export const TermProvider = ({ children }: { children: ReactNode }) => {
           },
           remove: {
             deleteTerm,
-            isDeleteError,
+            deleteErrorMessage: deleteError?.message ?? null,
             isDeletePending,
+            resetDeleteError,
           },
         },
       }}

@@ -70,6 +70,26 @@ type DeleteResponse = {
   name: string;
   result: unknown;
 };
+
+const getDeleteErrorMessage = async (response: Response): Promise<string> => {
+  try {
+    const errorResponse: unknown = await response.json();
+
+    if (
+      typeof errorResponse === "object" &&
+      errorResponse !== null &&
+      "detail" in errorResponse &&
+      typeof errorResponse.detail === "string"
+    ) {
+      return errorResponse.detail;
+    }
+  } catch {
+    // Use the fallback when the API does not return JSON.
+  }
+
+  return "Delete failed. Try again.";
+};
+
 export const deleteTerm = async (termName: string): Promise<DeleteResponse> => {
   const response = await fetch(
     `http://localhost:8000/terms/${encodeURIComponent(termName)}`, // Adds space like "Docker%20registry" to make it URL friendly
@@ -82,7 +102,7 @@ export const deleteTerm = async (termName: string): Promise<DeleteResponse> => {
   );
 
   if (!response.ok) {
-    throw new Error("Network response was not ok for DELETE term");
+    throw new Error(await getDeleteErrorMessage(response));
   }
 
   return await response.json();

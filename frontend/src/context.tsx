@@ -24,8 +24,9 @@ export type TermContextValue = {
     };
     remove: {
       deleteTerm: (term: string, success: { onSuccess: () => void }) => void;
-      isDeleteError: boolean;
+      deleteErrorMessage: string | null;
       isDeletePending: boolean;
+      resetDeleteError: () => void;
     };
   };
 };

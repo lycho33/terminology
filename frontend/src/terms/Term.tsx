@@ -255,7 +255,7 @@ const UpdateTermForm = ({ onEditMode }: UpdateFormProps) => {
 };
 
 const DeleteModal = ({
-  hasDeleteError,
+  deleteErrorMessage,
   termName,
   handleConfirmDelete,
   handleCancelDelete,
@@ -274,9 +274,9 @@ const DeleteModal = ({
         <p id="delete-term-description">
           This will delete <strong>{termName}</strong> from your knowledge base.
         </p>
-        {hasDeleteError && (
+        {deleteErrorMessage && (
           <p className="term-card__delete-error" role="alert">
-            Delete failed. Try again.
+            {deleteErrorMessage}
           </p>
         )}
         <div className="term-card__delete-actions">
@@ -306,7 +306,12 @@ export const TermCard = () => {
   const { term } = useTermContext();
   const { name, setTerm, get, create, update, remove: deleteFoo } = term;
   const dataTerm = get.term;
-  const { deleteTerm, isDeleteError, isDeletePending } = deleteFoo;
+  const {
+    deleteTerm,
+    deleteErrorMessage,
+    isDeletePending,
+    resetDeleteError,
+  } = deleteFoo;
 
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
@@ -315,8 +320,18 @@ export const TermCard = () => {
     deleteTerm(term, {
       onSuccess: () => {
         setTerm("");
+        setIsDeleteModalOpen(false);
       },
     });
+  };
+
+  const handleOpenDeleteModal = () => {
+    resetDeleteError();
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    resetDeleteError();
     setIsDeleteModalOpen(false);
   };
 
@@ -372,7 +387,7 @@ export const TermCard = () => {
                 aria-label={`Delete ${dataTerm?.name}`}
                 className="term-card__icon-button term-card__delete-button"
                 type="button"
-                onClick={() => setIsDeleteModalOpen(true)}
+                onClick={handleOpenDeleteModal}
                 disabled={isDeletePending}
               >
                 <FiMinus aria-hidden="true" />
@@ -393,10 +408,10 @@ export const TermCard = () => {
 
         {isDeleteModalOpen && dataTerm && (
           <DeleteModal
-            hasDeleteError={isDeleteError}
+            deleteErrorMessage={deleteErrorMessage}
             termName={dataTerm.name}
             handleConfirmDelete={() => handleDeleteTerm(dataTerm.name)}
-            handleCancelDelete={() => setIsDeleteModalOpen(false)}
+            handleCancelDelete={handleCancelDelete}
             isDeleting={isDeletePending}
           />
         )}

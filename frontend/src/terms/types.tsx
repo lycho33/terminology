@@ -13,7 +13,7 @@ export type CreateFormProps = {
 };
 
 export type DeleteModalProps = {
-  hasDeleteError: boolean;
+  deleteErrorMessage: string | null;
   termName: string;
   handleConfirmDelete: () => void;
   isDeleting: boolean;
