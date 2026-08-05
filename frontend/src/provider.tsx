@@ -6,18 +6,26 @@ import {
   useFetchTerm,
   useUpdateTerm,
 } from "./hooks";
+import { isApiError } from "./actions";
 
 export const TermProvider = ({ children }: { children: ReactNode }) => {
   const [term, setTerm] = useState<string>("");
 
-  const { data, isError, isLoading, isSuccess } = useFetchTerm(term);
+  const { data, error, isError, isLoading, isSuccess } = useFetchTerm(term);
 
   const [createStatus, setCreateStatus] =
     useState<CreateStatusEnum>("inactive");
-  const { mutate: createTerm } = useCreateTerm();
+  const {
+    mutate: createTerm,
+    error: createError,
+    isPending: isCreatePending,
+    reset: resetCreateError,
+  } = useCreateTerm();
 
   const {
     mutate: updateTerm,
+    error: updateError,
+    isPending: isUpdatePending,
     isSuccess: isUpdateSuccess,
     reset: resetUpdateSuccess,
   } = useUpdateTerm();
@@ -40,16 +48,23 @@ export const TermProvider = ({ children }: { children: ReactNode }) => {
             isError,
             isLoading,
             isSuccess,
+            errorMessage: error?.message ?? null,
+            errorStatus: isApiError(error) ? error.status : null,
           },
           create: {
             createTerm,
             status: createStatus,
             setStatus: setCreateStatus,
+            errorMessage: createError?.message ?? null,
+            isPending: isCreatePending,
+            resetError: resetCreateError,
           },
           update: {
             updateTerm,
             isSuccess: isUpdateSuccess,
             resetUpdateSuccess,
+            errorMessage: updateError?.message ?? null,
+            isPending: isUpdatePending,
           },
           remove: {
             deleteTerm,

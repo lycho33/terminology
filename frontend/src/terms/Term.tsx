@@ -24,6 +24,7 @@ export const TermSearchForm = () => {
   };
 
   const handleSubmitClick = () => {
+    create.resetError();
     create.setStatus("active");
   };
 
@@ -83,13 +84,22 @@ export const CreateTermForm = () => {
 
     if (nextTerm) {
       create.setStatus("pending");
-      create.createTerm({
-        name: nextTerm,
-        definition: nextDefinition || undefined,
-        diagram: nextDiagram || undefined,
-      });
-      setTerm(nextTerm);
-      create.setStatus("complete");
+      create.createTerm(
+        {
+          name: nextTerm,
+          definition: nextDefinition || undefined,
+          diagram: nextDiagram || undefined,
+        },
+        {
+          onSuccess: () => {
+            setTerm(nextTerm);
+            create.setStatus("complete");
+          },
+          onError: () => {
+            create.setStatus("error");
+          },
+        },
+      );
     }
   };
 
@@ -134,9 +144,18 @@ export const CreateTermForm = () => {
           />
         </div>
       </div>
+      {create.status === "error" && create.errorMessage && (
+        <p className="term-card__mutation-error" role="alert">
+          {create.errorMessage}
+        </p>
+      )}
       <div className="term-card__create-actions">
-        <button className="term-card__update-button" type="submit">
-          Create
+        <button
+          className="term-card__update-button"
+          type="submit"
+          disabled={create.isPending}
+        >
+          {create.isPending ? "Creating..." : "Create"}
         </button>
       </div>
     </form>
@@ -186,16 +205,27 @@ const UpdateTermForm = ({ onEditMode }: UpdateFormProps) => {
     const nextDiagram = newDiagram.trim();
 
     if (nextTerm) {
-      update.updateTerm({
-        term: name,
-        newTerm: nextTerm,
-        definition: nextDefinition || undefined,
-        diagram: nextDiagram || undefined,
-      });
-      setTerm(nextTerm);
-      onEditMode(false);
-      update.resetUpdateSuccess();
+      update.updateTerm(
+        {
+          term: name,
+          newTerm: nextTerm,
+          definition: nextDefinition || undefined,
+          diagram: nextDiagram || undefined,
+        },
+        {
+          onSuccess: () => {
+            setTerm(nextTerm);
+            onEditMode(false);
+            update.resetUpdateSuccess();
+          },
+        },
+      );
     }
+  };
+
+  const handleCancelUpdate = () => {
+    update.resetUpdateSuccess();
+    onEditMode(false);
   };
 
   return (
@@ -211,18 +241,28 @@ const UpdateTermForm = ({ onEditMode }: UpdateFormProps) => {
           onChange={handleTermChange}
           placeholder="update term"
         />
-        <button className="term-card__update-button" type="submit">
-          Update
+        <button
+          className="term-card__update-button"
+          type="submit"
+          disabled={update.isPending}
+        >
+          {update.isPending ? "Updating..." : "Update"}
         </button>
         <button
           aria-label="Cancel update"
           className="term-card__icon-button"
           type="button"
-          onClick={() => onEditMode(false)}
+          onClick={handleCancelUpdate}
+          disabled={update.isPending}
         >
           <VscChromeClose aria-hidden="true" />
         </button>
       </div>
+      {update.errorMessage && (
+        <p className="term-card__mutation-error" role="alert">
+          {update.errorMessage}
+        </p>
+      )}
       <div className="term-card__definition-editor">
         <label className="term-card__definition-label" htmlFor="definition">
           Definition
@@ -332,7 +372,16 @@ export const TermCard = () => {
     setIsDeleteModalOpen(false);
   };
 
-  if (create.status === "active") {
+  const handleOpenEdit = () => {
+    update.resetUpdateSuccess();
+    setIsEdit(true);
+  };
+
+  if (
+    create.status === "active" ||
+    create.status === "pending" ||
+    create.status === "error"
+  ) {
     return (
       <div className="term-card term-card--empty" role="status">
         <p className="eyebrow">Create a Term</p>
@@ -346,11 +395,22 @@ export const TermCard = () => {
   }
 
   if (get.isError) {
+    const isMissingTerm = get.errorStatus === 404;
+
     return (
-      <div className="term-card term-card--empty" role="status">
-        <p className="eyebrow">Not found</p>
+      <div
+        className="term-card term-card--empty"
+        role={isMissingTerm ? "status" : "alert"}
+      >
+        <p className="eyebrow">
+          {isMissingTerm ? "Not found" : "Lookup failed"}
+        </p>
         <h2>{name}</h2>
-        <p>No term card is available for this lookup yet.</p>
+        <p>
+          {isMissingTerm
+            ? "No term card is available for this lookup yet."
+            : (get.errorMessage ?? "Unable to reach the Terminology API.")}
+        </p>
       </div>
     );
   }
@@ -376,7 +436,7 @@ export const TermCard = () => {
                 aria-label={`Edit ${dataTerm?.name}`}
                 className="term-card__title-row-edit-btn"
                 type="button"
-                onClick={() => setIsEdit(true)}
+                onClick={handleOpenEdit}
               >
                 <MdOutlineEdit aria-hidden="true" />
               </button>

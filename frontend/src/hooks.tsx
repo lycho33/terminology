@@ -11,7 +11,7 @@ import { useContext } from "react";
 
 export const useFetchTerm = (
   termName: string,
-): QueryObserverResult<Term, unknown> => {
+): QueryObserverResult<Term, Error> => {
   return useQuery({
     queryKey: ["terms", termName],
     queryFn: () => getTerm(termName),

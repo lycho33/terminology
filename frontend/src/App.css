@@ -378,7 +378,8 @@
   margin: 0;
 }
 
-.term-card__delete-error {
+.term-card__delete-error,
+.term-card__mutation-error {
   color: #b42318;
   font-weight: 700;
 }

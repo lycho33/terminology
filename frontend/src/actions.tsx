@@ -5,6 +5,38 @@ type TermResponse = {
   term: Term;
 };
 
+export type ApiError = Error & { status: number };
+
+export const isApiError = (error: unknown): error is ApiError =>
+  error instanceof Error &&
+  "status" in error &&
+  typeof error.status === "number";
+
+const createApiError = (status: number, message: string): ApiError =>
+  Object.assign(new Error(message), { name: "ApiError", status });
+
+const getApiErrorMessage = async (
+  response: Response,
+  fallback: string,
+): Promise<string> => {
+  try {
+    const errorResponse: unknown = await response.json();
+
+    if (
+      typeof errorResponse === "object" &&
+      errorResponse !== null &&
+      "detail" in errorResponse &&
+      typeof errorResponse.detail === "string"
+    ) {
+      return errorResponse.detail;
+    }
+  } catch {
+    // Use the fallback when the API does not return JSON.
+  }
+
+  return fallback;
+};
+
 // https://tanstack.com/query/latest/docs/framework/react/quick-start
 export const getTerm = async (termName: string): Promise<Term> => {
   const response = await fetch(
@@ -12,7 +44,10 @@ export const getTerm = async (termName: string): Promise<Term> => {
   );
 
   if (!response.ok) {
-    throw new Error("Network response was not ok for GET term");
+    throw createApiError(
+      response.status,
+      await getApiErrorMessage(response, "Term lookup failed. Try again."),
+    );
   }
 
   return await response.json();
@@ -36,7 +71,10 @@ export const createTerm = async (term: {
   });
 
   if (!response.ok) {
-    throw new Error("Network response was not ok for POST term");
+    throw createApiError(
+      response.status,
+      await getApiErrorMessage(response, "Create failed. Try again."),
+    );
   }
 
   return await response.json();
@@ -61,7 +99,10 @@ export const updateTerm = async (
   );
 
   if (!response.ok) {
-    throw new Error("Network response was not ok for PATCH term");
+    throw createApiError(
+      response.status,
+      await getApiErrorMessage(response, "Update failed. Try again."),
+    );
   }
 
   const terms: TermResponse = await response.json(); // Update this
@@ -72,25 +113,6 @@ export const updateTerm = async (
 type DeleteResponse = {
   name: string;
   result: unknown;
-};
-
-const getDeleteErrorMessage = async (response: Response): Promise<string> => {
-  try {
-    const errorResponse: unknown = await response.json();
-
-    if (
-      typeof errorResponse === "object" &&
-      errorResponse !== null &&
-      "detail" in errorResponse &&
-      typeof errorResponse.detail === "string"
-    ) {
-      return errorResponse.detail;
-    }
-  } catch {
-    // Use the fallback when the API does not return JSON.
-  }
-
-  return "Delete failed. Try again.";
 };
 
 export const deleteTerm = async (termName: string): Promise<DeleteResponse> => {
@@ -105,7 +127,10 @@ export const deleteTerm = async (termName: string): Promise<DeleteResponse> => {
   );
 
   if (!response.ok) {
-    throw new Error(await getDeleteErrorMessage(response));
+    throw createApiError(
+      response.status,
+      await getApiErrorMessage(response, "Delete failed. Try again."),
+    );
   }
 
   return await response.json();
