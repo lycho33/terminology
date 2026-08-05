@@ -21,6 +21,7 @@ export type TermContextValue = {
     update: {
       updateTerm: (input: UpdateTermInput) => void;
       isSuccess: boolean;
+      resetUpdateSuccess: () => void;
     };
     remove: {
       deleteTerm: (term: string, success: { onSuccess: () => void }) => void;

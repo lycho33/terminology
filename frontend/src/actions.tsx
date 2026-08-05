@@ -21,6 +21,7 @@ export const getTerm = async (termName: string): Promise<Term> => {
 export const createTerm = async (term: {
   name: string;
   definition?: string;
+  diagram?: string;
 }): Promise<Term> => {
   const response = await fetch(`http://localhost:8000/terms/`, {
     method: "POST",
@@ -30,6 +31,7 @@ export const createTerm = async (term: {
     body: JSON.stringify({
       name: term.name,
       definition: term.definition,
+      diagram: term.diagram,
     }),
   });
 
@@ -53,6 +55,7 @@ export const updateTerm = async (
       body: JSON.stringify({
         name: termInputs.newTerm,
         definition: termInputs.definition,
+        diagram: termInputs.diagram,
       }),
     },
   );

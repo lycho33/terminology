@@ -41,6 +41,7 @@ export const useUpdateTerm = () => {
 export type CreateTermInput = {
   name: string;
   definition?: string;
+  diagram?: string;
 };
 export const useCreateTerm = () => {
   const queryClient = useQueryClient();

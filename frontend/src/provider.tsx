@@ -11,10 +11,17 @@ export const TermProvider = ({ children }: { children: ReactNode }) => {
   const [term, setTerm] = useState<string>("");
 
   const { data, isError, isLoading, isSuccess } = useFetchTerm(term);
+
   const [createStatus, setCreateStatus] =
     useState<CreateStatusEnum>("inactive");
   const { mutate: createTerm } = useCreateTerm();
-  const { mutate: updateTerm, isSuccess: isUpdateSuccess } = useUpdateTerm();
+
+  const {
+    mutate: updateTerm,
+    isSuccess: isUpdateSuccess,
+    reset: resetUpdateSuccess,
+  } = useUpdateTerm();
+
   const {
     mutate: deleteTerm,
     error: deleteError,
@@ -42,6 +49,7 @@ export const TermProvider = ({ children }: { children: ReactNode }) => {
           update: {
             updateTerm,
             isSuccess: isUpdateSuccess,
+            resetUpdateSuccess,
           },
           remove: {
             deleteTerm,

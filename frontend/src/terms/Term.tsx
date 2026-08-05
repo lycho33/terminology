@@ -7,25 +7,24 @@ import type { DeleteModalProps, UpdateFormProps } from "./types";
 
 export const TermSearchForm = () => {
   const { term } = useTermContext();
-  const { name, setTerm, create } = term;
+  const { setTerm, create } = term;
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTerm(e.target.value);
+    setSearchTerm(e.target.value);
   };
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const nextTerm = name.trim();
 
-    if (nextTerm) {
+    if (searchTerm) {
+      setTerm(searchTerm.trim());
       create.setStatus("inactive");
-      setTerm("");
     }
   };
 
   const handleSubmitClick = () => {
     create.setStatus("active");
-    setTerm("");
   };
 
   return (
@@ -36,7 +35,7 @@ export const TermSearchForm = () => {
           id="term"
           type="text"
           name="term"
-          value={name}
+          value={searchTerm}
           onChange={handleChange}
           placeholder="Term"
         />
@@ -194,6 +193,8 @@ const UpdateTermForm = ({ onEditMode }: UpdateFormProps) => {
         diagram: nextDiagram || undefined,
       });
       setTerm(nextTerm);
+      onEditMode(false);
+      update.resetUpdateSuccess();
     }
   };
 
@@ -306,12 +307,8 @@ export const TermCard = () => {
   const { term } = useTermContext();
   const { name, setTerm, get, create, update, remove: deleteFoo } = term;
   const dataTerm = get.term;
-  const {
-    deleteTerm,
-    deleteErrorMessage,
-    isDeletePending,
-    resetDeleteError,
-  } = deleteFoo;
+  const { deleteTerm, deleteErrorMessage, isDeletePending, resetDeleteError } =
+    deleteFoo;
 
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
