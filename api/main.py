@@ -7,7 +7,7 @@ from .models import Term, UpdateTermRequest
 from fastapi.middleware.cors import CORSMiddleware
 
 import httpx
-from neo4j.exceptions import DriverError, Neo4jError
+from neo4j.exceptions import ConstraintError, DriverError, Neo4jError
 
 app = FastAPI()
 
@@ -27,13 +27,22 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    # Initialise the connection to the database
+    # Initialize the connection to the database
     config = Neo4jConfig(
         uri=settings.neo4j_uri, 
         username=settings.neo4j_username, 
         password=settings.neo4j_password
     )
     init_neontology(config)
+
+    gc = GraphConnection()
+
+    unique_constraint_query = """
+    CREATE CONSTRAINT term_name_unique IF NOT EXISTS
+    FOR (t:Term) REQUIRE t.name IS UNIQUE
+    """
+    unique_result = gc.evaluate_query(unique_constraint_query)
+    print(unique_result)
 
 @app.get("/")
 def read_root():
@@ -56,19 +65,25 @@ def create_term(payload: Term):
     RETURN t.name AS name, t.definition AS definition, t.diagram as diagram
     """
 
-    result = gc.evaluate_query(
-        create_query,
-        {
-            "name": payload.name.capitalize(),
-            "definition": payload.definition if payload.definition else None,
-            "diagram": payload.diagram if payload.diagram else None,
-        },
-    )
+    try:
+        result = gc.evaluate_query(
+            create_query,
+            {
+                "name": payload.name.capitalize(),
+                "definition": payload.definition if payload.definition else None,
+                "diagram": payload.diagram if payload.diagram else None,
+            },
+        )
+    except ConstraintError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"{payload.name.capitalize()} already exists",
+        ) from exc
 
     if not result:
         raise HTTPException(
             status_code=400,
-            detail=f"Fail to create Node {payload.name.capitalize()}",
+            detail=f"❌ Failed to create {payload.name.capitalize()}",
         )
 
     return {"term": result}
@@ -95,16 +110,23 @@ def update_term(term_name: str, payload: UpdateTermRequest):
     RETURN t.name AS name, t.definition AS definition, t.diagram as diagram 
     """
 
-    result = gc.evaluate_query(
-        patch_query,
-        {
-            "current_name": term_name.capitalize(),
-            "updated_name": payload.name.capitalize() if payload.name else None,
-            "updated_definition": payload.definition,
-            "updated_diagram": payload.diagram
-        },
-    )
+    try:
+        result = gc.evaluate_query(
+            patch_query,
+            {
+                "current_name": term_name.capitalize(),
+                "updated_name": payload.name.capitalize() if payload.name else None,
+                "updated_definition": payload.definition,
+                "updated_diagram": payload.diagram
+            },
+        )
+    except ConstraintError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"{payload.name.capitalize()} already exists. Rename the term as something else.",
+        ) from exc
 
+    # Would we still reach this error?
     if not result:
         raise HTTPException(
             status_code=404,
