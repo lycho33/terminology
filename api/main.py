@@ -126,7 +126,7 @@ def delete_term(term_name: str):
     RETURN count(t) as deleted_count
     """
     try:
-        res = gc.evaluate_query(delete_query, {"term_name": term_name})
+        res = gc.evaluate_query(delete_query, {"term_name": term_name.capitalize()})
     except (DriverError, Neo4jError) as exc:
         raise HTTPException(
             status_code=500,
