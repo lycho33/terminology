@@ -167,10 +167,12 @@ const UpdateTermForm = ({ onEditMode }: UpdateFormProps) => {
   const { name, get, setTerm, update } = term;
 
   const [newTerm, setNewTerm] = useState<string>(name);
-  const [newDefinition, setNewDefinition] = useState<string>(
+  const [newDefinition, setNewDefinition] = useState<string | undefined>(
     get.term?.definition ?? "",
   );
-  const [newDiagram, setNewDiagram] = useState<string>(get.term?.diagram ?? "");
+  const [newDiagram, setNewDiagram] = useState<string | undefined>(
+    get.term?.diagram ?? "",
+  );
   const inputRef = useRef<HTMLInputElement>(null); // refers to the input field
 
   useEffect(() => {
@@ -201,16 +203,16 @@ const UpdateTermForm = ({ onEditMode }: UpdateFormProps) => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const nextTerm = newTerm.trim();
-    const nextDefinition = newDefinition.trim();
-    const nextDiagram = newDiagram.trim();
+    const nextDefinition = newDefinition?.trim();
+    const nextDiagram = newDiagram?.trim();
 
     if (nextTerm) {
       update.updateTerm(
         {
           term: name,
           newTerm: nextTerm,
-          definition: nextDefinition || undefined,
-          diagram: nextDiagram || undefined,
+          definition: nextDefinition,
+          diagram: nextDiagram,
         },
         {
           onSuccess: () => {
