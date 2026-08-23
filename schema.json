@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "properties": {
+    "project_layer": {
+      "type": "array",
+      "description": "Project layers affected by the review findings.",
+      "items": {
+        "type": "string",
+        "enum": ["Frontend", "API", "Graph"]
+      }
+    },
+    "code_recommendations": {
+      "type": "array",
+      "description": "Actionable code review recommendations.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Describe the problem, its impact"
+          },
+          "files": {
+            "type": "array",
+            "description": "Repository paths relevant to this recommendation.",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["description", "files"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["project_layer", "code_recommendations"],
+  "additionalProperties": false
+}
