@@ -51,6 +51,8 @@ services:
       PORT: 8000
     ports:
       - "8000:8000"
+    volumes:
+      - ./api:/api # stores the code in the container
     restart: "no"
     env_file: ".env"
   web-app:
