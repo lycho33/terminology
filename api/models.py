@@ -1,6 +1,6 @@
 from typing import Annotated, Optional
 
-from pydantic import AfterValidator, BaseModel, field_validator
+from pydantic import AfterValidator, BaseModel
 
 def check_not_empty(name: str) -> str:
     non_empty_name = name.strip()
