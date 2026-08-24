@@ -1,13 +1,21 @@
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import BaseModel
+from pydantic import AfterValidator, BaseModel, field_validator
+
+def check_not_empty(name: str) -> str:
+    non_empty_name = name.strip()
+    if not non_empty_name:
+        raise ValueError(f'❌ The field cannot be empty or just spaces')
+    return non_empty_name
+
+NonEmptyName = Annotated[str, AfterValidator(check_not_empty)]
 
 class Term(BaseModel):
-    name: str
+    name: NonEmptyName
     definition: Optional[str] = None
     diagram: Optional[str] = None
 
 class UpdateTermRequest(BaseModel):
-    name: Optional[str] = None
+    name: Optional[NonEmptyName] = None
     definition: Optional[str] = None
     diagram: Optional[str] = None

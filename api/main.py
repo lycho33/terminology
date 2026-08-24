@@ -75,11 +75,13 @@ def create_term(payload: Term):
             },
         )
     except ConstraintError as exc:
+        # Occurs from the create constraint for unique names
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"{payload.name.capitalize()} already exists",
+            detail=f"❌ {payload.name.capitalize()} already exists",
         ) from exc
 
+    # TODO: 🔥
     if not result:
         raise HTTPException(
             status_code=400,
@@ -121,6 +123,7 @@ def update_term(term_name: str, payload: UpdateTermRequest):
             },
         )
     except ConstraintError as exc:
+        # Occurs from the create constraint for unique names
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"{payload.name.capitalize()} already exists. Rename the term as something else.",
